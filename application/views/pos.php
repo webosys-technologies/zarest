@@ -180,7 +180,9 @@
                </span>
                <span class="Hold pl" onclick="AddHold()">+</i></span>
                <span class="Hold pl" onclick="RemoveHold()">-</span>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-weight: bold;font-size: 18px;">Table No. <?php echo $this->session->userdata('table_name'); ?></span> <input type="hidden" name="" id="table_id" value="<?php echo $this->session->userdata('table_id'); ?>"> 
             </div>
+             
          </div>
          <div class="col-xs-8">
             <h2><?=label("ChooseClient");?></h2>
@@ -377,6 +379,7 @@ $(document).ready(function() {
    $('.CreditCardNum').hide();
    $('.CreditCardHold').hide();
    $('.ChequeNum').hide();
+    $('.PaytmNum').hide();
    $('.stripe-btn').hide();
 
 
@@ -400,6 +403,7 @@ $(document).ready(function() {
          $('#CreditCardCODECV').val('');
          $('.stripe-btn').hide();
          $('.ChequeNum').hide();
+         $('.PaytmNum').hide();
       } else if (p_met === '1') {
          $('.Paid').show();
          $('.ReturnChange').hide();
@@ -410,6 +414,7 @@ $(document).ready(function() {
          $('.CreditCardCODECV').show();
          $('.stripe-btn').show();
          $('.ChequeNum').hide();
+          $('.PaytmNum').hide();
       } else if (p_met === '2') {
          $('.Paid').hide();
          $('.ReturnChange').hide();
@@ -425,6 +430,24 @@ $(document).ready(function() {
          $('#CreditCardCODECV').val('');
          $('.stripe-btn').hide();
          $('.ChequeNum').show();
+          $('.PaytmNum').hide();
+      }
+      else if (p_met === '3') {
+         $('.Paid').hide();
+         $('.ReturnChange').hide();
+         $('.CreditCardNum').hide();
+         $('.CreditCardHold').hide();
+         $('.CreditCardMonth').hide();
+         $('.CreditCardYear').hide();
+         $('.CreditCardCODECV').hide();
+         $('#CreditCardNum').val('');
+         $('#CreditCardHold').val('');
+         $('#CreditCardYear').val('');
+         $('#CreditCardMonth').val('');
+         $('#CreditCardCODECV').val('');
+         $('.stripe-btn').hide();
+         $('.ChequeNum').hide();
+         $('.PaytmNum').show();
       }
 
    });
@@ -840,6 +863,7 @@ function cancelPOS(){
 
 function saleBtn(type) {
    var clientID = $('#customerSelect').find('option:selected').val();
+   var tableId = $('#table_id').val();
    var clientName = $('#customerName span').text();
    var Tax = $('.TAX').val();
    var Discount = $('.Remise').val();
@@ -862,6 +886,9 @@ function saleBtn(type) {
        case '2':
            paidMethod += '~'+$('#ChequeNum').val()
            break;
+       case '3':
+           paidMethod += '~'+$('#PaytmNum').val()
+           break;
        case '0':
            var change = parseFloat(Total) - parseFloat(Paid);
            if(change==parseFloat(Total)) Status = 1;
@@ -874,7 +901,7 @@ function saleBtn(type) {
   $.ajax({
       url : "<?php echo site_url('pos/AddNewSale')?>/"+type,
       type: "POST",
-      data: {client_id: clientID, clientname: clientName, waiter_id: waiter, discountamount: discountamount, taxamount: taxamount, tax: Tax, discount: Discount, subtotal: Subtotal, total: Total, created_by: createdBy, totalitems: totalItems, paid: Paid, status: Status, paidmethod: paidMethod, ccnum: ccnum, ccmonth: ccmonth, ccyear: ccyear, ccv: ccv},
+      data: {client_id: clientID,table_id:tableId, clientname: clientName, waiter_id: waiter, discountamount: discountamount, taxamount: taxamount, tax: Tax, discount: Discount, subtotal: Subtotal, total: Total, created_by: createdBy, totalitems: totalItems, paid: Paid, status: Status, paidmethod: paidMethod, ccnum: ccnum, ccmonth: ccmonth, ccyear: ccyear, ccv: ccv},
       success: function(data)
       {
          $('#printSection').html(data);
@@ -988,6 +1015,7 @@ function showticket(){
                <option value="0"><?=label("Cash");?></option>
                <option value="1"><?=label("CreditCard");?></option>
                <option value="2"><?=label("Cheque");?></option>
+               <option value="3"><?=label("Paytm");?></option>
             </select>
            </div>
            <div class="form-group Paid">
@@ -1018,6 +1046,10 @@ function showticket(){
            <div class="form-group ChequeNum">
              <label for="ChequeNum"><?=label("ChequeNum");?></label>
              <input type="text" name="chequenum" class="form-control" id="ChequeNum" placeholder="<?=label("ChequeNum");?>">
+           </div>
+           <div class="form-group PaytmNum">
+             <label for="PaytmNum"><?=label("PaytmNum");?></label>
+             <input type="text" name="paytmnum" class="form-control" id="PaytmNum" placeholder="<?=label("Paytm Num");?>">
            </div>
           <div class="form-group ReturnChange">
              <h3 id="ReturnChange"><?=label("Change");?> <span>0</span> <?=$this->setting->currency;?></h3>

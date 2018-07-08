@@ -87,8 +87,9 @@ class Invoices extends CI_Controller
                 $id
             )
         ));
-
-        $ticket = '<div class="col-md-12"><div class="text-center">' . $this->setting->receiptheader . '</div><div style="clear:both;"><h4 class="text-center">' . label("SaleNum") . '.: ' . sprintf("%05d", $sale->id) . '</h4> <div style="clear:both;"></div><span class="float-left">' . label("Date") . ': ' . $sale->created_at->format('d-m-Y') . '</span><div style="clear:both;"><span class="float-left">' . label("Customer") . ': ' . $sale->clientname . '</span><div style="clear:both;"></div><table class="table" cellspacing="0" border="0"><thead><tr><th><em>#</em></th><th>' . label("Product") . '</th><th>' . label("Quantity") . '</th><th>' . label("SubTotal") . '</th></tr></thead><tbody>';
+         $table = Table::find($sale->table_id);
+      
+        $ticket = '<div class="col-md-12"><div class="text-center">' . $this->setting->receiptheader . '</div><div style="clear:both;"><h4 class="text-center">' . label("Table No.:") . $table->name . '</h4> <div style="clear:both;"><div class="text-center" style="font-size: 19px;font-weight: 600;padding: 5px;color: #415472;">JOINT EFFORT LLP</div><div style="clear:both;"><h4 class="text-center">' . label("SaleNum") . '.: ' . sprintf("%05d", $sale->id) . '</h4> <div style="clear:both;"></div><span class="float-left">' . label("Date") . ': ' . $sale->created_at->format('d-m-Y') . '</span><div style="clear:both;"><span class="float-left">' . label("Customer") . ': ' . $sale->clientname . '</span><div style="clear:both;"></div><table class="table" cellspacing="0" border="0"><thead><tr><th><em>#</em></th><th>' . label("Product") . '</th><th>' . label("Quantity") . '</th><th>' . label("SubTotal") . '</th></tr></thead><tbody>';
 
         $i = 1;
         foreach ($posales as $posale) {
@@ -100,13 +101,24 @@ class Invoices extends CI_Controller
         $bcs = 'code128';
         $height = 20;
         $width = 3;
-        $ticket .= '</tbody></table><table class="table" cellspacing="0" border="0" style="margin-bottom:8px;"><tbody><tr><td style="text-align:left;">' . label("TotalItems") . '</td><td style="text-align:right; padding-right:1.5%;">' . $sale->totalitems . '</td><td style="text-align:left; padding-left:1.5%;">' . label("Total") . '</td><td style="text-align:right;font-weight:bold;">' . number_format((float)$sale->subtotal, $this->setting->decimals, '.', '') . ' ' . $this->setting->currency . '</td></tr>';
+        $sub_total=number_format((float)$sale->subtotal, $this->setting->decimals, '.', '');
+        $sgst_per=5;   //$sale->tax/2;
+        $cgst_per=5;  //$sale->tax/2;  
+        $sgst=$sub_total*$sgst_per/100;
+        $cgst=$sub_total*$cgst_per/100;
+        $gst=$sgst+$cgst;
+        $sub_total=$sub_total-$gst;
+        $ticket .= '</tbody></table><table class="table" cellspacing="0" border="0" style="margin-bottom:8px;"><tbody><tr><td style="text-align:left;">' . label("TotalItems") . '</td><td style="text-align:right; padding-right:1.5%;">' . $sale->totalitems . '</td><td style="text-align:left; padding-left:1.5%;">' . label("Total") . '</td><td style="text-align:right;font-weight:bold;">' . $sub_total . ' ' . $this->setting->currency . '</td></tr>';
         // if there is a discount it will be displayed
         if (intval($sale->discount))
             $ticket .= '<tr><td style="text-align:left; padding-left:1.5%;"></td><td style="text-align:right;font-weight:bold;"></td><td style="text-align:left;">' . label("Discount") . '</td><td style="text-align:right; padding-right:1.5%;font-weight:bold;">' . $sale->discount . '</td></tr>';
             // same for the order tax
-        if (intval($sale->tax))
-            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("tax") . '</td><td style="text-align:right;font-weight:bold;">' . $sale->tax . '</td></tr>';
+//        if (intval($sale->tax))
+//        {
+            
+            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("SGST ".$sgst_per."%") . '</td><td style="text-align:right;font-weight:bold;">' . $sgst .' ' . $this->setting->currency . '</td></tr>';
+            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("CGST ".$cgst_per."%") . '</td><td style="text-align:right;font-weight:bold;">' . $cgst . ' ' . $this->setting->currency .'</td></tr>';
+//        }
 
         $ticket .= '<tr><td colspan="2" style="text-align:left; font-weight:bold; padding-top:5px;">' . label("GrandTotal") . '</td><td colspan="2" style="border-top:1px dashed #000; padding-top:5px; text-align:right; font-weight:bold;">' . number_format((float)$sale->total, $this->setting->decimals, '.', '') . ' ' . $this->setting->currency . '</td></tr><tr>';
 
@@ -133,6 +145,9 @@ class Invoices extends CI_Controller
                     break;
                 case '2': // case ckeck
                     $ticket .= '<td colspan="2" style="text-align:left; font-weight:bold; padding-top:5px;">' . label("ChequeNum") . ' (' . $PayMethode[1] . ')</td><td colspan="2" style="padding-top:5px; text-align:right; font-weight:bold;">'.number_format((float)$pay->paid, $this->setting->decimals, '.', '').' ' . $this->setting->currency . '</td></tr>';
+                    break;
+                 case '3': // case ckeck
+                    $ticket .= '<td colspan="2" style="text-align:left; font-weight:bold; padding-top:5px;">' . label("Paytm Mobile No.") . ' (' . $PayMethode[1] . ')</td><td colspan="2" style="padding-top:5px; text-align:right; font-weight:bold;">'.number_format((float)$pay->paid, $this->setting->decimals, '.', '').' ' . $this->setting->currency . '</td></tr>';
                     break;
                 default:
                     $ticket .= '<td colspan="2" style="text-align:left; font-weight:bold; padding-top:5px;">' . label("Paid") . ' (' . label("Cash") . ')</td><td colspan="2" style="padding-top:5px; text-align:right; font-weight:bold;">'. number_format((float)$pay->paid, $this->setting->decimals, '.', '') .' ' . $this->setting->currency . '</td></tr>';
@@ -164,7 +179,7 @@ class Invoices extends CI_Controller
         ));
         $ClientData = $client ? 'Customer: ' . $client->name . '<br>' . $client->phone . '<br>' . $client->email : label('WalkinCustomer');
 
-        $ticket = '<div class="col-sm-12"><table width="100%"><tr><td align="left"><span class="float-left">' . $this->setting->companyname . '<br>' . label("Tel") . ' ' . $this->setting->phone . '</span></td><td align="right"><img src="files/Setting/' . $this->setting->logo . '" alt="" width="100px" Style="margin:15px;float:right;"/></td></tr></table></div><div style="clear:both;"></div><h4 class="float-left">#' . sprintf("%05d", $sale->id) . '</h4> <div style="clear:both;"></div><span style="font-size:40px;font-weight:600;padding:5px;background-color:#415472;color:#fff;">' . label("INVOICE") . '</span><br><br><br><div style="clear:both;"></div><table width="100%"><tr><td align="left"><span class="float-left">' . label("Date") . ': ' . $sale->created_at->format('d-m-Y') . '</span></td><td align="right"><span Style="margin-bottom:15px;float:right;width:100%;text-align:right">' . $ClientData . '</span></td></tr></table><div style="clear:both;"></div><div style="clear:both;"></div><table class="table" cellspacing="0" border="0"><thead><tr style="background-color:#555;color:#fff;font-weight:600"><th><em>#</em></th><th>' . label("Product") . '</th><th>' . label("Quantity") . '</th><th>' . label("SubTotal") . '</th></tr></thead><tbody>';
+        $ticket = '<div class="col-sm-12"><table width="100%"><tr><td align="left"><span class="float-left">' . $this->setting->companyname . '<br>' . label("Tel") . ' ' . $this->setting->phone . '</span></td><td align="right"><img src="files/Setting/' . $this->setting->logo . '" alt="" width="100px" Style="margin:15px;float:right;"/></td></tr></table></div><div style="clear:both;"></div><h4 class="float-left">#' . sprintf("%05d", $sale->id) . '</h4> <div style="clear:both;"></div><span style="font-size:40px;font-weight:600;padding:5px;background-color:#415472;color:#fff;">' . label("INVOICE") . '</span><br><br><div style="clear:both;"></div><span style="font-size: 19px;font-weight:600;color: #415472;">' . label("Table: $sale->table_id") . '</span><br><div style="clear:both;"></div><table width="100%"><tr><td align="left"><span class="float-left">' . label("Date") . ': ' . $sale->created_at->format('d-m-Y') . '</span></td><td align="right"><span Style="margin-bottom:15px;float:right;width:100%;text-align:right">' . $ClientData . '</span></td></tr></table><div style="clear:both;"></div><div style="clear:both;"></div><table class="table" cellspacing="0" border="0"><thead><tr style="background-color:#555;color:#fff;font-weight:600"><th><em>#</em></th><th>' . label("Product") . '</th><th>' . label("Quantity") . '</th><th>' . label("SubTotal") . '</th></tr></thead><tbody>';
 
         $i = 1;
         foreach ($posales as $posale) {

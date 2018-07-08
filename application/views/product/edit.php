@@ -85,8 +85,8 @@ $(function() {
          <input type="number" step="any" Required name="cost" value="<?=$product->cost;?>" class="form-control" id="PurchasePrice" placeholder="<?=label("PurchasePrice");?>">
         </div>
         <div class="form-group">
-          <label for="Tax"><?=label("ProductTax");?></label>
-          <input type="text" name="tax" maxlength="10" value="<?=$product->tax;?>" class="form-control" id="Tax" placeholder="<?=label("ProductTax");?>">
+          <!--<label for="Tax"><?=label("ProductTax");?></label>-->
+            <input type="hidden" name="tax" maxlength="10" value="<?=$product->tax;?>" class="form-control" id="Tax" placeholder="<?=label("ProductTax");?>">
         </div>
         <div class="form-group">
            <label for="taxType"><?=label("TaxMethod");?></label>

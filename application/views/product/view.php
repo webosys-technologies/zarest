@@ -513,8 +513,8 @@ function PrintTicket() {
              <input type="number" step="any" value="0" Required name="cost" class="form-control" id="PurchasePrice" placeholder="<?=label("PurchasePrice");?>">
            </div>
            <div class="form-group">
-             <label for="Tax"><?=label("ProductTax");?></label>
-             <input type="text" maxlength="10" name="tax" class="form-control" id="Tax" placeholder="<?=label("ProductTax");?>">
+             <!--<label for="Tax"><?=label("ProductTax");?></label>-->
+             <input type="hidden" maxlength="10" name="tax" class="form-control" id="Tax" value="10%" placeholder="<?=label("ProductTax");?>">
            </div>
            <div class="form-group">
               <label for="taxType"><?=label("TaxMethod");?></label>
