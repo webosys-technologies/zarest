@@ -269,6 +269,7 @@ DROP TABLE IF EXISTS `zarest_sales`;
 CREATE TABLE IF NOT EXISTS `zarest_sales` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `client_id` int(11) NOT NULL,
+  `table_id` int(11) NOT NULL,
   `clientname` varchar(50) NOT NULL,
   `tax` varchar(5) DEFAULT NULL,
   `discount` varchar(10) DEFAULT NULL,
