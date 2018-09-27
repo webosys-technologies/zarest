@@ -523,7 +523,7 @@ class Pos extends CI_Controller
         }
         $table = Table::find($sale->table_id);
 
-        $ticket = '<div class="col-md-12"><div class="text-center">' . $this->setting->receiptheader . '</div><div style="clear:both;"><h4 class="text-center">' . label("Table No.:") . $table->name . '</h4> <div style="clear:both;"><div class="text-center" style="font-size: 19px;font-weight: 600;padding: 5px;color: #415472;">JOINT EFFORT LLP</div><div style="clear:both;"><h4 class="text-center">' . label("SaleNum") . '.: ' . sprintf("%05d", $sale->id) . '</h4> <div style="clear:both;"></div><span class="float-left">' . label("Date") . ': ' . $sale->created_at->format('d-m-Y H:i:s') . '</span><br><div style="clear:both;"><span class="float-left">' . label("Customer") . ': ' . $sale->clientname . '</span><div style="clear:both;"><table class="table" cellspacing="0" border="0"><thead><tr><th><em>#</em></th><th>' . label("Product") . '</th><th>' . label("Quantity") . '</th><th>' . label("SubTotal") . '</th></tr></thead><tbody>';
+        $ticket = '<div class="col-md-12"><div class="text-center">' . $this->setting->receiptheader . '</div><div style="clear:both;"><h4 class="text-center">' . label("Table No.:") . $table->name . '</h4> <div style="clear:both;"><div class="text-center" style="font-size: 19px;font-weight: 600;padding: 5px;color: #415472;">'.$this->setting->companyname.'</div><div style="clear:both;"><h4 class="text-center">' . label("SaleNum") . '.: ' . sprintf("%05d", $sale->id) . '</h4> <div style="clear:both;"></div><span class="float-left">' . label("Date") . ': ' . $sale->created_at->format('d-m-Y H:i:s') . '</span><br><div style="clear:both;"><span class="float-left">' . label("Customer") . ': ' . $sale->clientname . '</span><div style="clear:both;"><table class="table" cellspacing="0" border="0"><thead><tr><th><em>#</em></th><th>' . label("Product") . '</th><th>' . label("Quantity") . '</th><th>' . label("SubTotal") . '</th></tr></thead><tbody>';
 
         $i = 1;
         foreach ($posales as $posale) {
@@ -543,13 +543,18 @@ class Pos extends CI_Controller
         $gst=$sgst+$cgst;
         $sub_total=$sub_total-$gst;
         
-        $ticket .= '</tbody></table><table class="table" cellspacing="0" border="0" style="margin-bottom:8px;"><tbody><tr><td style="text-align:left;">' . label("TotalItems") . '</td><td style="text-align:right; padding-right:1.5%;">' . $sale->totalitems . '</td><td style="text-align:left; padding-left:1.5%;">' . label("Total") . '</td><td style="text-align:right;font-weight:bold;">' . $sub_total . ' ' . $this->setting->currency . '</td></tr>';
+        $ticket .= '</tbody></table><table class="table" cellspacing="0" border="0" style="margin-bottom:8px;"><tbody><tr><td style="text-align:left;">' . label("TotalItems") . '</td><td style="text-align:right; padding-right:1.5%;">' . $sale->totalitems . '</td><td style="text-align:left; padding-left:1.5%;">' . label("Total") . '</td><td style="text-align:right;font-weight:bold;">' . $sub_ttl=number_format((float)$sale->subtotal, $this->setting->decimals, '.', '') . ' ' . $this->setting->currency . '</td></tr>';
+        // if there is a discount it will be displayed
         if (intval($sale->discount))
-            $ticket .= '<tr><td style="text-align:left; padding-left:1.5%;"></td><td style="text-align:right;font-weight:bold;"></td><td style="text-align:left;">' . label("Discount") . '</td><td style="text-align:right; padding-right:1.5%;font-weight:bold;">' . $sale->discount . '</td></tr>';
-//        if (intval($sale->tax))
-            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("SGST ".$sgst_per."%") . '</td><td style="text-align:right;font-weight:bold;">' . $sgst .' ' . $this->setting->currency . '</td></tr>';
-            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("CGST ".$cgst_per."%") . '</td><td style="text-align:right;font-weight:bold;">' . $cgst .' ' . $this->setting->currency . '</td></tr>';
-
+            $ticket .= '<tr><td style="text-align:left; padding-left:1.5%;"></td><td style="text-align:right;font-weight:bold;"></td><td style="text-align:left;">' . label("Discount $sale->discount") . '</td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"> - ' . $sub_ttl*$sale->discount/100 . ' ' . $this->setting->currency  . '</td></tr>';
+            // same for the order tax
+        if (intval($sale->tax))
+        {
+            
+//            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("SGST ".$sgst_per."%") . '</td><td style="text-align:right;font-weight:bold;">' . $sgst .' ' . $this->setting->currency . '</td></tr>';
+//            $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("CGST ".$cgst_per."%") . '</td><td style="text-align:right;font-weight:bold;">' . $cgst . ' ' . $this->setting->currency .'</td></tr>';
+              $ticket .= '<tr><td style="text-align:left;"></td><td style="text-align:right; padding-right:1.5%;font-weight:bold;"></td><td style="text-align:left; padding-left:1.5%;">' . label("GST $sale->tax") . '</td><td style="text-align:right;font-weight:bold;"> ' . $sub_ttl*$sale->tax/100 . ' ' . $this->setting->currency .'</td></tr>';
+        }
             $ticket .= '<tr><td colspan="2" style="text-align:left; font-weight:bold; padding-top:5px;">' . label("GrandTotal") . '</td><td colspan="2" style="border-top:1px dashed #000; padding-top:5px; text-align:right; font-weight:bold;">' . number_format((float)$sale->total, $this->setting->decimals, '.', '') . ' ' . $this->setting->currency . '</td></tr><tr>';
 
         $PayMethode = explode('~', $sale->paidmethod);
